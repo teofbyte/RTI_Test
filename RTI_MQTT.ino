@@ -17,7 +17,7 @@ bool retain = true;
 String status = "OK";
 String deviceID = "Teofilus";
 String Fan = "OFF";
-int pinFan = 23;
+int pinFan = 27;
 
 // Nilai sensor global
 float temp = 0, volt = 0, amp = 0, pa = 0;
