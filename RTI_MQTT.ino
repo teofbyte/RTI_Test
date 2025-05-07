@@ -17,6 +17,7 @@ bool retain = true;
 String status = "OK";
 String deviceID = "Teofilus";
 String Fan = "OFF";
+int pinFan = 23;
 
 // Nilai sensor global
 float temp = 0, volt = 0, amp = 0, pa = 0;
@@ -27,6 +28,7 @@ TaskHandle_t TaskSensor;
 
 void setup() {
   Serial.begin(115200);
+  pinMode(pinFan, OUTPUT);
   setupsensor();
 
   WiFi.begin(ssid, pass);
@@ -63,7 +65,13 @@ void sensorTask(void *parameter) {
     pa = readPower();
 
     // Kontrol fan berdasarkan suhu
-    Fan = (temp >= 27.54) ? "ON" : "OFF";
+    if(temp >= 27.54){
+      Fan = "ON";
+      digitalWrite(pinFan, 1);
+    }else{
+      Fan = "OFF";
+      digitalWrite(pinFan, 0);
+    }
 
     // Buat dan kirim JSON
     String json = buatJSONStatus(status, deviceID, String(volt), String(amp), String(pa), String(temp), Fan);
@@ -102,5 +110,5 @@ String buatJSONStatus(String status, String deviceID, String v, String i, String
 }
 
 void loop() {
-  // Tidak perlu digunakan karena semua tugas dijalankan di task FreeRTOS
+  
 }
