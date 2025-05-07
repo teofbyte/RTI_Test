@@ -1,16 +1,16 @@
 #include <ModbusMaster.h>
 #include <HardwareSerial.h>
 
-#define MAX485_DE 4  // Pin DE/RE RS485
-#define MAX485_RE 4
+#define RXD1 16  // Power Meter RX
+#define TXD1 17  // Power Meter TX
+#define RXD2 26  // Temp Sensor RX
+#define TXD2 25  // Temp Sensor TX
 
-#define TX_PIN 17  // TX ke RS485
-#define RX_PIN 16  // RX dari RS485
+HardwareSerial powerSerial(1);
+HardwareSerial tempSerial(2);
 
-ModbusMaster nodeTemp;   // Untuk TX4S
-ModbusMaster nodePower;  // Untuk Selec EM4M
-
-HardwareSerial rs485Serial(2);  // Gunakan UART2 (GPIO16 RX, GPIO17 TX)
+ModbusMaster powerMeter;
+ModbusMaster tempSensor;
 
 float temperature = 0.0;
 float voltage = 0.0;
@@ -41,42 +41,42 @@ void setupsensor() {
 }
 
 float readTemperature() {
-  uint8_t result = nodeTemp.readInputRegisters(301001, 1);  // Address & length tergantung TX4S
-  if (result == nodeTemp.ku8MBSuccess) {
-    uint16_t raw = nodeTemp.getResponseBuffer(0);
-    return raw / 10.0;  // Misal data suhu 1 desimal, sesuaikan dengan datasheet TX4S
+  uint8_t result = tempSensor.readInputRegisters(301001, 2);  // Ganti sesuai alamat register Autonics
+  if (result == tempSensor.ku8MBSuccess) {
+    uint16_t raw = tempSensor.getResponseBuffer(0);
+    return raw / 10.0;  // misal data 245 → 24.5°C
   }
-  return -999.0;
+  return -1;
 
   // return random(250, 350) / 10.0;
 }
 
 float readVoltage() {
-  uint8_t result = nodePower.readInputRegisters(30006, 2);  // Cek alamat di datasheet EM4M
-  if (result == nodePower.ku8MBSuccess) {
-    uint32_t raw = ((uint32_t)nodePower.getResponseBuffer(0) << 16) | nodePower.getResponseBuffer(1);
-    return raw / 100.0;  // Contoh konversi, tergantung datasheet
+  uint8_t result = powerMeter.readInputRegisters(30006, 2);  // Ganti sesuai alamat Selec
+  if (result == powerMeter.ku8MBSuccess) {
+    return powerMeter.getResponseBuffer(0) / 10.0;
   }
-  return -1;
+  return -1
+
   // return random(250, 350) / 10.0;
 }
 
 float readCurrent() {
-  uint8_t result = nodePower.readInputRegisters(30022, 2);
-  if (result == nodePower.ku8MBSuccess) {
-    uint32_t raw = ((uint32_t)nodePower.getResponseBuffer(0) << 16) | nodePower.getResponseBuffer(1);
-    return raw / 1000.0;  // Contoh: 1 digit = mA
+  uint8_t result = powerMeter.readInputRegisters(30022, 2);  // Ganti sesuai
+  if (result == powerMeter.ku8MBSuccess) {
+    return powerMeter.getResponseBuffer(0) / 100.0;
   }
   return -1;
+
   // return random(250, 350) / 10.0;
 }
 
 float readPower() {
-  uint8_t result = nodePower.readInputRegisters(30042, 2);
-  if (result == nodePower.ku8MBSuccess) {
-    uint32_t raw = ((uint32_t)nodePower.getResponseBuffer(0) << 16) | nodePower.getResponseBuffer(1);
-    return raw / 100.0;
+  uint8_t result = powerMeter.readInputRegisters(30042, 2);  // Ganti sesuai
+  if (result == powerMeter.ku8MBSuccess) {
+    return powerMeter.getResponseBuffer(0) / 10.0;
   }
   return -1;
+
   // return random(250, 350) / 10.0;
 }
