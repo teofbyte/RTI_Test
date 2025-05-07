@@ -1,6 +1,9 @@
 #include <ModbusMaster.h>
 #include <HardwareSerial.h>
 
+#define MAX485_DE 4  // Pin DE/RE RS485
+#define MAX485_RE 4
+
 #define RXD1 16  // Power Meter RX
 #define TXD1 17  // Power Meter TX
 #define RXD2 26  // Temp Sensor RX
